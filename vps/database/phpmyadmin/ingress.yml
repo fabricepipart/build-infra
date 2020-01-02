@@ -1,0 +1,27 @@
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: phpmyadmin-http-ingress
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.org/ssl-services: "phpmyadmin-service"
+    ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    # Enable client certificate authentication
+    nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"
+    # Specify the verification depth in the client certificates chain
+    nginx.ingress.kubernetes.io/auth-tls-verify-depth: "1"
+spec:
+  tls:
+  - hosts:
+    - phpmyadmin.teknichrono.fr
+    secretName: letsencrypt-certificate
+  rules:
+  - host: phpmyadmin.teknichrono.fr
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: phpmyadmin-service
+          servicePort: 80

@@ -1,0 +1,155 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: seedbox
+  name: rtorrent-internal
+  labels:
+    app: rtorrent
+spec:
+  selector:
+    app: rtorrent
+  ports:
+    - port: 80
+      name: rtorrent-80
+    - port: 5000
+      name: rtorrent-5000
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  namespace: seedbox
+  name: torrents
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.org/ssl-services: "rtorrent-internal"
+    ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    # Enable client certificate authentication
+    nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"
+    # Specify the verification depth in the client certificates chain
+    nginx.ingress.kubernetes.io/auth-tls-verify-depth: "1"
+spec:
+  tls:
+  - hosts:
+    - torrents.teknichrono.fr
+    secretName: letsencrypt-certificate
+  rules:
+  - host: torrents.teknichrono.fr
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: rtorrent-internal
+          servicePort: 80
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rtorrent-config
+data:
+  rtorrent.rc: |
+    execute = {sh,-c,/usr/bin/php7 /usr/share/webapps/rutorrent/php/initplugins.php abc &}
+    execute.nothrow = rm,/run/php/.rtorrent.sock
+    #network.scgi.open_local = /run/php/.rtorrent.sock
+    schedule = socket_chmod,0,0,"execute=chmod,0660,/run/php/.rtorrent.sock"
+    schedule = socket_chgrp,0,0,"execute=chgrp,abc,/run/php/.rtorrent.sock"
+    log.open_file = "rtorrent", /config/log/rtorrent/rtorrent.log
+    log.add_output = "info", "rtorrent"
+    min_peers = 40
+    max_peers = 1200
+    max_uploads = 15
+    download_rate = 15000
+    upload_rate = 5000
+    #schedule = watch_directory_1,5,5,"load.start=/downloads/watched/*.torrent"
+    directory = /downloads/incoming
+    session = /downloads/sessions
+    schedule = low_diskspace,5,60,close_low_diskspace=100M
+    #ip = 178.32.28.59
+    bind = 0.0.0.0
+    port_range = 51413-51413
+    check_hash = yes
+    #use_udp_trackers = yes
+    encryption = allow_incoming,try_outgoing,enable_retry
+    dht = disable
+    dht_port = 6881
+    #peer_exchange = no
+    # network.http.ssl_verify_peer.set=0
+    scgi_port = 0.0.0.0:5000
+    encoding_list = UTF-8
+    system.umask.set = 022
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: rtorrent
+  name: rtorrent
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: rtorrent
+  template:
+    metadata:
+      labels:
+        app: rtorrent
+    spec:
+      containers:
+      - env:
+        - name: PGID
+          value: "5001"
+        - name: PUID
+          value: "5001"
+        - name: TZ
+          value: Europe/Paris
+        image: linuxserver/rutorrent
+        imagePullPolicy: Always
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - rm
+              - /downloads/sessions/rtorrent.lock
+        resources:
+          requests:
+            cpu: 1
+            memory: 200M
+          limits:
+            cpu: 2
+        name: rtorrent
+        ports:
+        - containerPort: 80
+          protocol: TCP
+        - containerPort: 5000
+          protocol: TCP
+        - containerPort: 6881
+          hostPort: 6881
+          protocol: TCP
+        - containerPort: 51413
+          hostPort: 51413
+          protocol: TCP
+        volumeMounts:
+        - mountPath: /config/rtorrent/rtorrent.rc
+          name: rtorrent-config
+          subPath: rtorrent.rc
+        - mountPath: /downloads
+          name: rtorrent-downloads
+        - mountPath: /config/rutorrent
+          name: rutorrent-config
+      restartPolicy: Always
+      securityContext:
+        fsGroup: 5001
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: rtorrent-config
+        name: rtorrent-config
+      - name: rtorrent-downloads
+        persistentVolumeClaim:
+          claimName: rtorrent-downloads
+      - name: rutorrent-config
+        persistentVolumeClaim:
+          claimName: rutorrent-config
