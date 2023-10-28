@@ -11,5 +11,8 @@ spec:
     - name: microk8s
       namespace: kube-system
       server: "*"
+    - name: in-cluster
+      namespace: argocd
+      server: "*"
   sourceRepos:
     - https://github.com/fabricepipart/build-infra
