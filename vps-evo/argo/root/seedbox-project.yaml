@@ -4,9 +4,6 @@ metadata:
   name: seedbox
   namespace: argocd
 spec:
-  clusterResourceWhitelist:
-    - group: networking.k8s.io
-      kind: Ingress
   destinations:
     - name: microk8s
       namespace: seedbox

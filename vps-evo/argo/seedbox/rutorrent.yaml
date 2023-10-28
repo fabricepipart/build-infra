@@ -36,14 +36,14 @@ spec:
       name: rtorrent-32161
   type: NodePort
 ---
-apiVersion: extensions/v1beta1
+apiVersion: extensions/v1
 kind: Ingress
 metadata:
   namespace: seedbox
   name: torrents
   annotations:
     cert-manager.io/cluster-issuer: lets-encrypt
-    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
 spec:
   tls:
     - hosts:
@@ -54,9 +54,12 @@ spec:
       http:
         paths:
           - path: /
+            pathType: Prefix
             backend:
-              serviceName: rtorrent-internal
-              servicePort: 80
+              service:
+                name: rtorrent-internal
+                port:
+                  number: 80
 ---
 apiVersion: apps/v1
 kind: Deployment
