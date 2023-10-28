@@ -1,0 +1,114 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: seedbox
+  name: rtorrent-internal
+  labels:
+    app: rtorrent
+spec:
+  selector:
+    app: rtorrent
+  ports:
+    - port: 80
+      name: rtorrent-80
+    - port: 5000
+      name: rtorrent-5000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: seedbox
+  name: rtorrent-external
+  labels:
+    app: rtorrent
+spec:
+  selector:
+    app: rtorrent
+  ports:
+    - protocol: UDP
+      port: 32160
+      nodePort: 32160
+      name: rtorrent-32160
+    - protocol: TCP
+      port: 32161
+      nodePort: 32161
+      name: rtorrent-32161
+  type: NodePort
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  namespace: seedbox
+  name: torrents
+  annotations:
+    cert-manager.io/cluster-issuer: lets-encrypt
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+spec:
+  tls:
+    - hosts:
+        - seedbox.evo.teknichrono.fr
+      secretName: seedbox-ingress-tls
+  rules:
+    - host: seedbox.evo.teknichrono.fr
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: rtorrent-internal
+              servicePort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: rtorrent
+  name: rtorrent
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: rtorrent
+  template:
+    metadata:
+      labels:
+        app: rtorrent
+    spec:
+      containers:
+        - env:
+          image: diameter/rtorrent-rutorrent
+          imagePullPolicy: Always
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - rm
+                  - /downloads/sessions/rtorrent.lock
+          resources:
+            requests:
+              cpu: 100m
+              memory: 200M
+            limits:
+              cpu: 2
+          name: rtorrent
+          ports:
+            - containerPort: 80
+              protocol: TCP
+            - containerPort: 5000
+              protocol: TCP
+            - containerPort: 32160
+              protocol: UDP
+            - containerPort: 32161
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /downloads
+              name: rtorrent-downloads
+      restartPolicy: Always
+      securityContext:
+        fsGroup: 5001
+      volumes:
+        - name: rtorrent-downloads
+          persistentVolumeClaim:
+            claimName: rtorrent-downloads

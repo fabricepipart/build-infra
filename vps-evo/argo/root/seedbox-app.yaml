@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: seedbox
+spec:
+  destination:
+    name: in-cluster
+    namespace: argocd
+  source:
+    path: vps-evo/argo/seedbox
+    repoURL: "https://github.com/fabricepipart/build-infra"
+    targetRevision: HEAD
+    directory:
+      recurse: true
+  project: seedbox
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
