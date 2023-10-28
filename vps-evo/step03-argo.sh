@@ -48,4 +48,4 @@ argocd account update-password
 argocd cluster add microk8s
 
 kubectl config set-context --current --namespace=argocd
-argocd app create root --repo https://github.com/fabricepipart/build-infra --path vps-evo/argo/root --directory-recurse --sync-policy auto --auto-prune --self-heal --dest-name in-cluster --dest-namespace argocd
+argocd app create root --repo https://github.com/fabricepipart/build-infra --path vps-evo/argo/root --directory-recurse --sync-policy auto --auto-prune --self-heal --dest-name in-cluster --dest-namespace argocd --grpc-web
