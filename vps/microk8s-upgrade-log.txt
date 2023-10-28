@@ -1,0 +1,40 @@
+ 1018  sudo snap refresh microk8s --classic --channel=1.21/stable
+ 1025  microk8s inspect
+ 1026   sudo journalctl -u snap.microk8s.daemon-kubelite
+ 1035  cd /var/snap/microk8s/current/
+  1040  cp args/kube-apiserver args/kube-apiserver.bak
+ 1042  vi args/kube-apiserver
+https://github.com/kubernetes/kubeadm/issues/2156
+
+
+[root@vmi291141 current]# sudo snap refresh microk8s --classic --channel=1.22/stable
+[root@vmi291141 current]# microk8s inspect
+[root@vmi291141 current]# k get po -A
+
+
+
+kubectl proxy
+
+export NAMESPACE=ingress-nginx
+kubectl get namespace $NAMESPACE -o json > tmp.json
+vi tmp.json
+curl -k -H "Content-Type: application/json" -X PUT --data-binary @tmp.json 127.0.0.1:8001/api/v1/namespaces/$NAMESPACE/finalize
+
+
+[root@vmi291141 ~]#  microk8s.helm3 upgrade --install ingress-nginx ingress-nginx --repo https://kubernetes.github.io/ingress-nginx --namespace ingress-nginx --create-namespace
+
+
+export LC_ALL="en_US.UTF-8"
+export LC_CTYPE="en_US.UTF-8"
+
+k get po -n ingress
+
+
+
+
+
+-----
+install zsh
+install brew
+install k9s
+upgrade kubectl
