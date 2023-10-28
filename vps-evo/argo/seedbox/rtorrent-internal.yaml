@@ -1,0 +1,16 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: seedbox
+  name: rtorrent-internal
+  labels:
+    app: rtorrent
+spec:
+  selector:
+    app: rtorrent
+  ports:
+    - port: 80
+      name: rtorrent-80
+    - port: 5000
+      name: rtorrent-5000

@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: seedbox
+  name: rtorrent-external
+  labels:
+    app: rtorrent
+spec:
+  selector:
+    app: rtorrent
+  ports:
+    - protocol: UDP
+      port: 32160
+      nodePort: 32160
+      name: rtorrent-32160
+    - protocol: TCP
+      port: 32161
+      nodePort: 32161
+      name: rtorrent-32161
+  type: NodePort

@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  namespace: seedbox
+  name: torrents
+  annotations:
+    cert-manager.io/cluster-issuer: lets-encrypt
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+spec:
+  tls:
+    - hosts:
+        - seedbox.evo.teknichrono.fr
+      secretName: seedbox-ingress-tls
+  rules:
+    - host: seedbox.evo.teknichrono.fr
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: rtorrent-internal
+                port:
+                  number: 80
