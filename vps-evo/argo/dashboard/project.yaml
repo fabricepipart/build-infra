@@ -1,0 +1,15 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: dashboard
+  namespace: argocd
+spec:
+  clusterResourceWhitelist:
+    - group: networking.k8s.io
+      kind: Ingress
+  destinations:
+    - name: microk8s
+      namespace: kube-system
+      server: "*"
+  sourceRepos:
+    - https://github.com/fabricepipart/build-infra

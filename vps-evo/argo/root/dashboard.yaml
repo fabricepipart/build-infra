@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: dashboard
+spec:
+  destination:
+    name: in-cluster
+    namespace: argocd
+  source:
+    path: vps-evo/argo/dashboard
+    repoURL: "https://github.com/fabricepipart/build-infra"
+    targetRevision: HEAD
+    directory:
+      recurse: true
+  project: dashboard
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
