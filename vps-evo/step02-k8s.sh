@@ -4,7 +4,7 @@ set -e
 # --- microk8s
 apt update -y
 apt upgrade -y
-apt install -y snapd git proftpd
+apt install -y snapd git proftpd apache2-utils
 snap install microk8s --classic
 snap alias microk8s.kubectl kubectl
 snap alias microk8s.kubectl k
