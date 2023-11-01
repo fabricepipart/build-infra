@@ -16,3 +16,4 @@ spec:
       server: "*"
   sourceRepos:
     - https://github.com/fabricepipart/build-infra
+    - https://danuk.github.io/k8s-webdav/
