@@ -9,7 +9,7 @@ spec:
     name: microk8s
     namespace: seedbox
   source:
-    chart: k8s-webdav/webdav
+    chart: webdav
     repoURL: https://danuk.github.io/k8s-webdav/
     targetRevision: 0.0.7
     helm:
