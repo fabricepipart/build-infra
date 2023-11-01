@@ -1,0 +1,38 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: k8s-webdav
+  namespace: seedbox
+spec:
+  project: seedbox
+  destination:
+    server: in-cluster
+    namespace: argocd
+  source:
+    chart: k8s-webdav/webdav
+    repoURL: https://danuk.github.io/k8s-webdav/
+    targetRevision: 1.16.1
+    helm:
+      valuesObject:
+        urls:
+          /:
+            htpasswdSecretRef:
+              name: seedbox-credentials
+              key: TORRENTS_HTPWD
+        existingHtpasswdSecrets:
+          - name: seedbox-credentials
+
+        ingress:
+          className: public
+          host: webdav.evo.teknichrono.fr
+          annotations:
+            cert-manager.io/cluster-issuer: lets-encrypt
+            nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+          tls:
+            enabled: true
+            secret: webdav-ingress-tls
+
+        persistence:
+          enabled: true
+          type: pvc
+          existingClaim: rtorrent-downloads
