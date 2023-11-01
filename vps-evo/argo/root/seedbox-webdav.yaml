@@ -8,6 +8,10 @@ spec:
   destination:
     name: microk8s
     namespace: seedbox
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
   source:
     chart: webdav
     repoURL: https://danuk.github.io/k8s-webdav/
