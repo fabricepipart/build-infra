@@ -6,8 +6,8 @@ metadata:
 spec:
   project: seedbox
   destination:
-    server: in-cluster
-    namespace: argocd
+    server: microk8s
+    namespace: seedbox
   source:
     chart: k8s-webdav/webdav
     repoURL: https://danuk.github.io/k8s-webdav/
