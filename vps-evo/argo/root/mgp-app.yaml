@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: mgp-timings
+spec:
+  destination:
+    name: microk8s
+    namespace: seedbox
+  source:
+    path: vps-evo/argo/mgp-timings
+    repoURL: "https://github.com/fabricepipart/build-infra"
+    targetRevision: HEAD
+    directory:
+      recurse: true
+  project: mgp-timings
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

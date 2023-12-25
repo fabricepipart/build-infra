@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: mgp-timings
+  namespace: argocd
+spec:
+  clusterResourceWhitelist:
+    - group: "*"
+      kind: "*"
+  destinations:
+    - name: microk8s
+      namespace: mgp-timings
+      server: "*"
+    - name: in-cluster
+      namespace: argocd
+      server: "*"
+  sourceRepos:
+    - https://github.com/fabricepipart/build-infra
