@@ -5,7 +5,7 @@ metadata:
 spec:
   destination:
     name: microk8s
-    namespace: seedbox
+    namespace: mgp-timings
   source:
     path: vps-evo/argo/mgp-timings
     repoURL: "https://github.com/fabricepipart/build-infra"
